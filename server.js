@@ -8,7 +8,6 @@ connectDB();
 
 const app = express();
 
-// ✅ Allow frontend from local + Vercel
 const allowedOrigins = [
   "http://localhost:5173",
   "https://funds-project-tau.vercel.app",
@@ -16,15 +15,20 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // for tools like Postman
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
 app.use(express.json());
-
-// ✅ Optional preflight support
-app.options("*", cors());
+app.options("*", cors()); // optional preflight support
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
