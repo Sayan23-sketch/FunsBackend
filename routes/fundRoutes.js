@@ -9,6 +9,7 @@ const {
   removeSavedFund,
 } = require("../controllers/fundController");
 
+// Routes
 router.post("/save", authMiddleware, saveFund);
 router.get("/saved", authMiddleware, getSavedFunds);
 router.post("/custom", authMiddleware, addCustomFund);
