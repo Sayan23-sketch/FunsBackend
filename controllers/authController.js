@@ -5,9 +5,11 @@ exports.register = async (req, res) => {
   try {
     const user = await User.create(req.body);
     res.status(201).json("User registered");
-  } catch (err) {
-    res.status(400).json("Registration failed");
-  }
+  }catch (err) {
+  console.error("Registration error:", err.message); // log the actual cause
+  res.status(400).json(err.message || "Registration failed");
+}
+
 };
 
 exports.login = async (req, res) => {
