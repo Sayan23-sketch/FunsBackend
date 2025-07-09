@@ -8,15 +8,14 @@ connectDB();
 
 const app = express();
 
-// ✅ Allow these frontend origins
+// ✅ Set up CORS properly — PUT THIS BEFORE ALL ROUTES OR MIDDLEWARES
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://funds-project-tau.vercel.app"
 ];
 
-// ✅ Configure CORS
-const corsOptions = {
+app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -28,20 +27,18 @@ const corsOptions = {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
-};
+}));
 
-app.use(cors(corsOptions));
+// ✅ MUST set OPTIONS before express.json or routes
+app.options("*", cors());
 
-// ✅ Must include OPTIONS for preflight
-app.options("*", cors(corsOptions));
-
-// ✅ Parse JSON
+// ✅ JSON parser
 app.use(express.json());
 
 // ✅ Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/funds", require("./routes/fundRoutes"));
 
-// ✅ Start Server
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
