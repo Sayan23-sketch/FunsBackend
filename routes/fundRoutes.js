@@ -17,6 +17,7 @@ router.get("/custom", authMiddleware, getCustomFunds);
 router.delete("/remove/:id", authMiddleware, removeSavedFund);
 
 // ✅ New route to get a fund by ID
-router.get("/:id", authMiddleware, getFundById);
+router.get("/:id", getFundById); // ✅ Public
+
 
 module.exports = router;

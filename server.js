@@ -8,13 +8,14 @@ connectDB();
 
 const app = express();
 
-// ✅ Set up CORS properly — PUT THIS BEFORE ALL ROUTES OR MIDDLEWARES
+// ✅ Setup allowed origins
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://funds-project-tau.vercel.app"
 ];
 
+// ✅ Use CORS
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -25,14 +26,11 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// ✅ MUST set OPTIONS before express.json or routes
-app.options("*", cors());
-
-// ✅ JSON parser
+// ✅ Parse JSON
 app.use(express.json());
 
 // ✅ Routes
