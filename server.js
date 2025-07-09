@@ -8,17 +8,20 @@ connectDB();
 
 const app = express();
 
-// ✅ Use a whitelist
+// ✅ Allow these frontend origins
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://127.0.0.1:5173",
   "https://funds-project-tau.vercel.app"
 ];
 
+// ✅ Configure CORS
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("❌ Blocked origin:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -27,15 +30,16 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// ✅ Allow preflight (important for Authorization headers)
+// ✅ Must include OPTIONS for preflight
 app.options("*", cors());
 
+// ✅ Parse JSON
 app.use(express.json());
 
-// Routes
+// ✅ Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/funds", require("./routes/fundRoutes"));
 
-// Start server
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
