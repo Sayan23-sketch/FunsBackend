@@ -8,29 +8,16 @@ connectDB();
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://funds-project-tau.vercel.app",
-];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+// TEMP: Allow All Origins for Debugging
+app.use(cors({
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true,
-};
+}));
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // ✅ preflight with correct config
+app.options("*", cors());
 
 app.use(express.json());
 
-// Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/funds", require("./routes/fundRoutes"));
 
