@@ -1,3 +1,4 @@
+const axios = require("axios");
 const SavedFund = require("../models/SavedFund");
 const CustomFund = require("../models/CustomFund");
 
@@ -5,12 +6,11 @@ const CustomFund = require("../models/CustomFund");
 // @route POST /api/funds/save
 // @access Private
 exports.saveFund = async (req, res) => {
-  const fundId = req.body.fundId || req.body.schemeCode; //  Support both names
+  const fundId = req.body.fundId || req.body.schemeCode;
 
-  if (!fundId) return res.status(400).json({ msg: " Fund ID is required" });
+  if (!fundId) return res.status(400).json({ msg: "Fund ID is required" });
 
   try {
-    // Check if already saved
     const existing = await SavedFund.findOne({
       userId: req.user.id,
       fundId,
@@ -25,30 +25,28 @@ exports.saveFund = async (req, res) => {
       fundId,
     });
 
-    console.log(" Fund saved:", saved);
-    res.status(201).json({ msg: " Fund saved successfully" });
+    console.log("Fund saved:", saved);
+    res.status(201).json({ msg: "Fund saved successfully" });
   } catch (err) {
-    console.error(" Error saving fund:", err);
-    res.status(500).json({ msg: " Server error while saving fund" });
+    console.error("Error saving fund:", err);
+    res.status(500).json({ msg: "Server error while saving fund" });
   }
 };
 
-// @desc Get saved fund IDs (for both API and custom funds)
+// @desc Get saved fund IDs
 // @route GET /api/funds/saved
 // @access Private
 exports.getSavedFunds = async (req, res) => {
   try {
-    const saved = await SavedFund.find({ userId: req.user.id }).select(
-      "fundId"
-    );
+    const saved = await SavedFund.find({ userId: req.user.id }).select("fundId");
 
     const savedFundIds = saved.map((f) => f.fundId);
-    console.log(" Saved fund IDs:", savedFundIds);
+    console.log("Saved fund IDs:", savedFundIds);
 
     res.json({ savedFundIds });
   } catch (err) {
-    console.error(" Error fetching saved funds:", err);
-    res.status(500).json({ msg: " Error fetching saved funds" });
+    console.error("Error fetching saved funds:", err);
+    res.status(500).json({ msg: "Error fetching saved funds" });
   }
 };
 
@@ -59,7 +57,7 @@ exports.addCustomFund = async (req, res) => {
   const { name, fundHouse, nav, date } = req.body;
 
   if (!name || !fundHouse || !nav || !date) {
-    return res.status(400).json({ msg: " All fields are required" });
+    return res.status(400).json({ msg: "All fields are required" });
   }
 
   try {
@@ -69,12 +67,12 @@ exports.addCustomFund = async (req, res) => {
     });
 
     res.status(201).json({
-      message: " Custom fund added successfully",
-      fundId: created._id, // Needed in frontend
+      message: "Custom fund added successfully",
+      fundId: created._id,
     });
   } catch (err) {
-    console.error(" Failed to add custom fund:", err);
-    res.status(500).json({ msg: " Failed to add custom fund" });
+    console.error("Failed to add custom fund:", err);
+    res.status(500).json({ msg: "Failed to add custom fund" });
   }
 };
 
@@ -83,14 +81,12 @@ exports.addCustomFund = async (req, res) => {
 // @access Private
 exports.getCustomFunds = async (req, res) => {
   try {
-    const funds = await CustomFund.find({ userId: req.user.id }).sort({
-      createdAt: -1,
-    });
+    const funds = await CustomFund.find({ userId: req.user.id }).sort({ createdAt: -1 });
 
     res.json(funds);
   } catch (err) {
-    console.error(" Error fetching custom funds:", err);
-    res.status(500).json({ msg: " Error fetching custom funds" });
+    console.error("Error fetching custom funds:", err);
+    res.status(500).json({ msg: "Error fetching custom funds" });
   }
 };
 
@@ -110,7 +106,27 @@ exports.removeSavedFund = async (req, res) => {
 
     res.json({ msg: "Fund removed successfully" });
   } catch (err) {
-    console.error(" Error removing fund:", err);
+    console.error("Error removing fund:", err);
     res.status(500).json({ msg: "Error removing fund" });
+  }
+};
+
+// ✅ NEW: Get external MFAPI fund details by ID
+// @route GET /api/funds/:id
+// @access Private (remove authMiddleware in routes if you want it public)
+exports.getFundById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const response = await axios.get(`https://api.mfapi.in/mf/${id}`);
+
+    if (!response.data || response.data.status === "ERROR") {
+      return res.status(404).json({ msg: "Fund not found" });
+    }
+
+    res.json(response.data);
+  } catch (err) {
+    console.error("Error fetching fund by ID:", err.message);
+    res.status(500).json({ msg: "Server error while fetching fund" });
   }
 };
