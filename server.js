@@ -16,7 +16,7 @@ const allowedOrigins = [
 ];
 
 // ✅ Configure CORS
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -28,10 +28,12 @@ app.use(cors({
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
-}));
+};
+
+app.use(cors(corsOptions));
 
 // ✅ Must include OPTIONS for preflight
-app.options("*", cors());
+app.options("*", cors(corsOptions));
 
 // ✅ Parse JSON
 app.use(express.json());
